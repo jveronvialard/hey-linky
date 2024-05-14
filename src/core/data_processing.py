@@ -10,7 +10,7 @@ import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 
 YOUTUBE_API_KEY = os.environ["YOUTUBE_API_KEY"]
-CLIENT_SECRETS_FILE = "../client_secret.json"
+CLIENT_SECRETS_FILE = "client_secret.json"
 
 # allows for full read/write access to the authenticated user's account and requires requests to use an SSL connection.
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]

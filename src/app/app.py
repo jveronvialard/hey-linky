@@ -1,16 +1,30 @@
+from dotenv import load_dotenv
 from flask import Flask, request
-import sys
 import json
+import os
 import requests
-import wandb
+
 
 from agent import run
 
-WANDB_PROJECT = os.environ["WANBD_PROJECT"]
-WANDB_ENTITY = os.environ["WANDB_ENTITY"]
+load_dotenv()  # take environment variables from .env.
 
-wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
 
+WANDB_PROJECT = os.environ.get("WANBD_PROJECT", None)
+WANDB_ENTITY = os.environ.get("WANDB_ENTITY", None)
+
+if WANDB_PROJECT and WANDB_ENTITY:
+    import wandb
+    
+    wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
+
+    def log(name, value):
+        wandb.log({name: value})
+
+else:
+    
+    def log(name, value):
+        print({name: value})
 
 app = Flask(__name__)
 
@@ -76,13 +90,13 @@ def generate_route():
     messages = run(messages)
 
     for m in messages:
-        wandb.log({"role": m["role"]})
+        log("role", m["role"])
         if "name" in m:
-            wandb.log({"name": m["name"]})
-        wandb.log({"content": m["content"]})
+            log("name", m["name"])
+        log("content", m["content"])
 
     return messages[-1]["content"]
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="5002")
+    app.run(host="0.0.0.0", port="5000")
