@@ -27,7 +27,7 @@ You can run the Flask app inside a virtual instance or on your personal laptop. 
 As of 5/13/2024:
 - [Groq](https://wow.groq.com/): llama3-70b for $0.59 (resp. $0.79) per 1M input (resp. output) tokens;
 - [Brave](https://brave.com/search/api/): a free account gives you 1 query per second and up to 2,000 queries per month;
-- [AWS EC2]: you can get a t2.small for $0.023/hour on-demand.
+- [AWS EC2](https://aws.amazon.com/ec2/instance-types/t2/): you can get a t2.small for $0.023/hour on-demand.
 
 ## How to use
 Front-end tested with iOS only. You can also make post requests directly to the backend, e.g. using Python.
