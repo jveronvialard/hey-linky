@@ -9,92 +9,83 @@ import pytz
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 
-YOUTUBE_API_KEY = os.environ["YOUTUBE_API_KEY"]
-CLIENT_SECRETS_FILE = "client_secret.json"
 
-# allows for full read/write access to the authenticated user's account and requires requests to use an SSL connection.
+# allows for full read/write access to the authenticated user's account 
+# and requires requests to use an SSL connection.
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
-
-def get_authenticated_service():
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-    credentials = flow.run_local_server(host="localhost", port=54344)
-    return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-# When running locally, disable OAuthlib's
-# HTTPs verification. When running in production
-# * do not * leave this option enabled.
+# When running locally, disable OAuthlib's HTTPs verification.
+# When running in production * do not * leave this option enabled.
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-client = get_authenticated_service()
 
 
 class YoutubeData:
-    def __init__(self):
-        self.response = None
+    def __init__(self, youtube_api_key, youtube_client_secret_file):
+        self.youtube_api_key = youtube_api_key
+        self.youtube_client_secret_file = youtube_client_secret_file
+        self.client = self.get_authenticated_service()
+        self.subscriptions = None
+
+    def get_authenticated_service(self):
+        flow = InstalledAppFlow.from_client_secrets_file(self.youtube_client_secret_file, SCOPES)
+        credentials = flow.run_local_server(host="localhost", port=54344)
+        return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
     def get_subscriptions(self):
-        self.response = (
-            client.subscriptions()
+        self.subscriptions = (
+            self.client.subscriptions()
             .list(**{"part": "snippet, contentDetails", "mine": True, "maxResults": 10})
             .execute()
         )
 
     def get_metadata(self):
-        if self.response is None:
+        if self.subscriptions is None:
             self.get_subscriptions()
-        title = self.response["items"][0]["snippet"]["title"]
-        description = self.response["items"][0]["snippet"]["description"]
-        channelId = self.response["items"][0]["snippet"]["resourceId"]["channelId"]
+        title = self.subscriptions["items"][0]["snippet"]["title"]
+        description = self.subscriptions["items"][0]["snippet"]["description"]
+        channelId = self.subscriptions["items"][0]["snippet"]["resourceId"]["channelId"]
         return title, description, channelId
 
     def get_items(self):
-        if self.response is None:
+        if self.subscriptions is None:
             self.get_subscriptions()
-        items = self.response["items"]
+        items = self.subscriptions["items"]
         return items
 
     def get_channel_description(self):
-        if self.response is None:
-            self.get_subscriptions()
         """Retrieve list of subscribed channel description."""
-        if self.response is None:
+        if self.subscriptions is None:
             self.get_subscriptions()
         return {
             item["snippet"]["channelId"]: item["snippet"]["description"]
-            for item in self.response["items"]
+            for item in self.subscriptions["items"]
         }
 
     def get_channel_titles(self):
-        if self.response is None:
-            self.get_subscriptions()
         """Retrieve list of subscribed channel titles."""
-        if self.response is None:
+        if self.subscriptions is None:
             self.get_subscriptions()
-        items = self.response["items"]
+        items = self.subscriptions["items"]
         return [item["snippet"]["title"] for item in items]
 
     def get_channel_ids(self):
-        if self.response is None:
-            self.get_subscriptions()
         """Retrieve list of subscribed channel IDs."""
-        if self.response is None:
+        if self.subscriptions is None:
             self.get_subscriptions()
         return [
             item["snippet"]["resourceId"]["channelId"]
-            for item in self.response["items"]
+            for item in self.subscriptions["items"]
         ]
 
     def get_videos_published_in_last_days(self, days: int):
-        if self.response is None:
-            self.get_subscriptions()
         channelIds = self.get_channel_ids()
         all_videos_simple = {}
         for channelId in channelIds:
             date_x_days_ago = datetime.utcnow() - timedelta(days=days)
             formatted_date = date_x_days_ago.isoformat("T") + "Z"  # Format as RFC 3339
-            url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channelId}&publishedAfter={formatted_date}&maxResults=25&order=date&type=video&key={YOUTUBE_API_KEY}"
+            url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channelId}&publishedAfter={formatted_date}&maxResults=25&order=date&type=video&key={self.youtube_api_key}"
             response = requests.get(url)
             if response.status_code == 200:
                 response_data = response.json()
@@ -122,10 +113,8 @@ class YoutubeData:
         return transcript
 
     def get_all_video_descrition(self, channelId: str) -> dict:
-        if self.response is None:
-            self.get_subscriptions()
         """Fetch and return all video descriptions for a given channel."""
-        url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channelId}&maxResults=50&order=date&type=video&key={YOUTUBE_API_KEY}"
+        url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channelId}&maxResults=50&order=date&type=video&key={self.youtube_api_key}"
         response = requests.get(url)
         video_descriptions = {}
 
@@ -141,9 +130,7 @@ class YoutubeData:
         return video_descriptions
 
     def get_video_comments(self, video_id: str):
-        if self.response is None:
-            self.get_subscriptions()
-        url = f"https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={video_id}&key={YOUTUBE_API_KEY}&maxResults=100"
+        url = f"https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={video_id}&key={self.youtube_api_key}&maxResults=100"
         response = requests.get(url)
         comments = []
         if response.status_code == 200:
@@ -154,9 +141,7 @@ class YoutubeData:
         return comments
 
     def get_video_likes_dislikes(self, video_id: str):
-        if self.response is None:
-            self.get_subscriptions()
-        url = f"https://www.googleapis.com/youtube/v3/videos?part=statistics&id={video_id}&key={YOUTUBE_API_KEY}"
+        url = f"https://www.googleapis.com/youtube/v3/videos?part=statistics&id={video_id}&key={self.youtube_api_key}"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()["items"][0]["statistics"]
@@ -169,7 +154,10 @@ class YoutubeData:
 
 
 if __name__ == "__main__":
-    YTD = YoutubeData()
+    youtube_api_key = os.environ["YOUTUBE_API_KEY"]
+    youtube_client_secret_file = "client_secret.json"
+    
+    YTD = YoutubeData(youtube_api_key=youtube_api_key, youtube_client_secret_file=youtube_client_secret_file)
     title, description, channelId = YTD.get_metadata()
     print("Video IDs: ")
     video_metadata = YTD.get_videos_published_in_last_days(days=13)

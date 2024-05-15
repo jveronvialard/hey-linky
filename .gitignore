@@ -2,5 +2,6 @@
 */.DS_Store
 __pycache__/
 /venv/
+*.egg-info/
 client_secret.json
 .env

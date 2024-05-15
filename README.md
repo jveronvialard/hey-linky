@@ -56,14 +56,15 @@ Create a conda environment, install the necessary packages, and start the app:
 ```
 conda create -n linky-env python=3.9
 conda activate linky-env
-pip install -r requirements.txt
-python src/app/app.py
+pip install -e .
+python linky/app/app.py
 ```
 
 If you are on a local laptop, the Google authentification flow happens in the browser. If you are on a virtual machine, you might be required to change the authentification flow, e.g. by creating a `google.oauth2.credentials.Credentials` object directly from your client_id, client_secret, and temporary token.
 
 ### Apple Shortcut
 On your iPhone, go to Shortcuts, and create the following flow:
+```
 "Text" element with value "Hi, any questions?"
 "Set variable" element with variable name "Prompt".
 "Repeat" element. 10 times.
@@ -72,5 +73,5 @@ On your iPhone, go to Shortcuts, and create the following flow:
     "Get contents of URL" element. "http://address:5000/". Set method to JSON and request body to JSON. Add "new field" of type "text" with key "prompt" and text "Provided Input" element.
     "Get text from" element.
     "Set variable" element with variable name "Prompt".
-
+```
 Then, rename the shortcut "Hey Linky". You're all set.
