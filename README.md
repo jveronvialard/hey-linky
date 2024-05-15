@@ -77,9 +77,4 @@ On your iPhone, go to Shortcuts, and create the following flow:
 Then, rename the shortcut "Hey Linky". You're all set.
 
 ## Contributing
-Feel free to open a PR. Use pre-commit to automatically format your code:
-```
-conda install -c conda-forge pre-commit
-pre-commit install
-```
-If your using Windows, you might need to create a Python venv instead of using conda.
+Feel free to open a PR. Use [pre-commit](https://pre-commit.com/) to automatically format your code. If your using Windows, you might need to create a Python venv instead of using conda.
