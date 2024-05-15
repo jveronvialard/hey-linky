@@ -11,7 +11,7 @@
 
 Do you love listening to podcast and videos from your favorite influencers, but find yourself drowning in the sea of content? Are you frustrated by missing out on crucial information, or struggling to distill key insights from lengthy episodes or videos?
 
-Enter Linky, your personalized content companion. Linky revolutionizes information consumption by letting you interact with the content you like from your favorite social media channels, and can also fetch general information directly from the internet. Whether you're craving the latest releases or seeking key insights, Linky has you covered. 
+Enter Linky, your personalized content companion. Linky revolutionizes information consumption by letting you interact with the content you like from your favorite social media channels, and can also fetch general information directly from the internet. Whether you're craving the latest releases or seeking key insights, Linky has you covered.
 
 Just say "Hey Linky" to get started. You can also interact with Linky through a chat interface. Choose whatever works best for you at the moment you are seeking the information!
 
@@ -75,3 +75,11 @@ On your iPhone, go to Shortcuts, and create the following flow:
     "Set variable" element with variable name "Prompt".
 ```
 Then, rename the shortcut "Hey Linky". You're all set.
+
+## Contributing
+Feel free to open a PR. Use pre-commit to automatically format your code:
+```
+conda install -c conda-forge pre-commit
+pre-commit install
+```
+If your using Windows, you might need to create a Python venv instead of using conda.

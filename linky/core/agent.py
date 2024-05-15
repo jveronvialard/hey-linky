@@ -1,15 +1,26 @@
 import copy
-from groq import Groq
 import json
+
+from groq import Groq
 
 from linky.core.brave import BraveData
 from linky.core.youtube import YoutubeData
 
 
 class Agent:
-    def __init__(self, system_prompt, groq_api_key, brave_api_key, youtube_api_key, youtube_client_secret_file):       
+    def __init__(
+        self,
+        system_prompt,
+        groq_api_key,
+        brave_api_key,
+        youtube_api_key,
+        youtube_client_secret_file,
+    ):
         self.client = Groq(api_key=groq_api_key)
-        self.YTD = YoutubeData(youtube_api_key=youtube_api_key, youtube_client_secret_file=youtube_client_secret_file)
+        self.YTD = YoutubeData(
+            youtube_api_key=youtube_api_key,
+            youtube_client_secret_file=youtube_client_secret_file,
+        )
         self.BD = BraveData(brave_api_key=brave_api_key)
 
         self.functions_mapping = {
@@ -113,7 +124,7 @@ class Agent:
                 "role": "system",
                 "content": self.system_prompt,
             },
-        ]  
+        ]
 
     def reset(self):
         self.messages = [
@@ -141,22 +152,22 @@ class Agent:
                 "content": prompt,
             }
         ]
-            
+
         response = self.predict(self.messages, tool_choice="auto")
-    
+
         if response.tool_calls:
-    
+
             for tool_call in response.tool_calls:
                 function_name = tool_call.function.name
                 function_to_call = self.functions_mapping[function_name]
                 function_args = json.loads(tool_call.function.arguments)
                 function_response = function_to_call(**function_args)
-    
+
                 if isinstance(function_response, dict):
                     function_response = json.dumps(function_response)
                 if isinstance(function_response, list):
                     function_response = json.dumps(function_response)
-    
+
                 self.messages.append(
                     {
                         "tool_call_id": tool_call.id,
@@ -165,14 +176,14 @@ class Agent:
                         "content": function_response,
                     }
                 )
-        
+
                 response = self.predict(self.messages, tool_choice="none")
-    
+
         self.messages += [
             {
                 "role": "assistant",
                 "content": response.content,
             }
         ]
-    
+
         return self.messages

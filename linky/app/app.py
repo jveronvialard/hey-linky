@@ -1,12 +1,12 @@
 import argparse
-from dotenv import load_dotenv
-from flask import Flask, request
 import os
 
-from linky.core.agent import Agent
-from linky.core.logger import Logger
-from linky.core.constants import SYSTEM_PROMPT
+from dotenv import load_dotenv
+from flask import Flask, request
 
+from linky.core.agent import Agent
+from linky.core.constants import SYSTEM_PROMPT
+from linky.core.logger import Logger
 
 load_dotenv()
 
@@ -32,19 +32,21 @@ def generate_route():
 
     else:
         messages = agent.run(prompt=prompt)
-    
+
         for m in messages:
             logger.log("role", m["role"])
             if "name" in m:
                 logger.log("name", m["name"])
             logger.log("content", m["content"])
-    
+
         return messages[-1]["content"]
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Linky app')
-    parser.add_argument("--youtube_client_secret_file", type=str, default="client_secret.json")
+    parser = argparse.ArgumentParser(description="Linky app")
+    parser.add_argument(
+        "--youtube_client_secret_file", type=str, default="client_secret.json"
+    )
     parser.add_argument("--port", type=str, default="5000")
     args = parser.parse_args()
 
@@ -53,12 +55,9 @@ if __name__ == "__main__":
         groq_api_key=GROQ_API_KEY,
         brave_api_key=BRAVE_API_KEY,
         youtube_api_key=YOUTUBE_API_KEY,
-        youtube_client_secret_file=args.youtube_client_secret_file
+        youtube_client_secret_file=args.youtube_client_secret_file,
     )
-    
-    logger = Logger(
-        wandb_project=WANDB_PROJECT,
-        wandb_entity=WANDB_ENTITY
-    )
+
+    logger = Logger(wandb_project=WANDB_PROJECT, wandb_entity=WANDB_ENTITY)
 
     app.run(host="0.0.0.0", port=args.port)

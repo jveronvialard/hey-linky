@@ -1,16 +1,16 @@
 import os
+from datetime import datetime, timedelta
+
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from google_auth_oauthlib.flow import InstalledAppFlow
-from datetime import datetime, timedelta
 import pytz
 import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from youtube_transcript_api import YouTubeTranscriptApi
 
-
-# allows for full read/write access to the authenticated user's account 
+# allows for full read/write access to the authenticated user's account
 # and requires requests to use an SSL connection.
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
@@ -29,7 +29,9 @@ class YoutubeData:
         self.subscriptions = None
 
     def get_authenticated_service(self):
-        flow = InstalledAppFlow.from_client_secrets_file(self.youtube_client_secret_file, SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(
+            self.youtube_client_secret_file, SCOPES
+        )
         credentials = flow.run_local_server(host="localhost", port=54344)
         return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
@@ -100,9 +102,9 @@ class YoutubeData:
                     video_summaries.append(video_summary)
                 all_videos_simple[channelId] = video_summaries
             else:
-                all_videos_simple[channelId] = (
-                    f"Failed to retrieve videos, status code: {response.status_code}"
-                )
+                all_videos_simple[
+                    channelId
+                ] = f"Failed to retrieve videos, status code: {response.status_code}"
         return all_videos_simple
 
     def get_video_transcript(self, videoId: str, maxLength: int = None):
@@ -156,8 +158,11 @@ class YoutubeData:
 if __name__ == "__main__":
     youtube_api_key = os.environ["YOUTUBE_API_KEY"]
     youtube_client_secret_file = "client_secret.json"
-    
-    YTD = YoutubeData(youtube_api_key=youtube_api_key, youtube_client_secret_file=youtube_client_secret_file)
+
+    YTD = YoutubeData(
+        youtube_api_key=youtube_api_key,
+        youtube_client_secret_file=youtube_client_secret_file,
+    )
     title, description, channelId = YTD.get_metadata()
     print("Video IDs: ")
     video_metadata = YTD.get_videos_published_in_last_days(days=13)
