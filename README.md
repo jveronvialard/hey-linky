@@ -38,7 +38,7 @@ Front-end tested with iOS only. You can also make post requests directly to the 
 - Groq. Create an account and add the API key to .env file.
 - Weights & Biases (optional). Create a free account and add the API key to .env file.
 
-The `.env` file should be at the project root directory and contains the following environment variables:
+The `.env` file should be at the project root directory and contain the following environment variables:
 ```
 YOUTUBE_API_KEY=XXX
 GROQ_API_KEY=XXX
@@ -77,4 +77,4 @@ On your iPhone, go to Shortcuts, and create the following flow:
 Then, rename the shortcut "Hey Linky". You're all set.
 
 ## Contributing
-Feel free to open a PR. Use [pre-commit](https://pre-commit.com/) to automatically format your code. If your using Windows, you might need to create a Python venv instead of using conda.
+Feel free to open a PR. Use [pre-commit](https://pre-commit.com/) to automatically format your code. If you're using Windows, you might need to create a Python venv instead of using conda.
